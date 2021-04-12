@@ -1,0 +1,697 @@
+//
+// Created by ashim on 2/21/2019.
+//
+
+//
+#include <iostream>
+#include <vector>
+#include <exception>
+
+using std::cout;
+using std::endl;
+using std::vector;
+//
+
+
+template <typename T>
+struct LinkedList {
+
+
+    /*======Nested Node Class=====*/
+    class Node
+    {
+    public:
+        T  data;                        //data that is stored
+
+        Node* next= nullptr;        //a pointer to the next node
+
+        Node* prev= nullptr;       //if a pointer to the prev node (IF DOUBLY-LINKED)
+
+        /*====Destroy the pointers as they fall out of scope=====*/
+
+    };
+    //END OF NESTED CLASS//
+
+    /*----THE ONLY ACCESSIBLE NODE(DATA HOLDERS) OF THE LIST---*/
+    Node* pointerToHead= nullptr;                       //A node pointer to the head
+    Node* pointerToTail= nullptr;                       //A node pointer to the tail
+    unsigned int nodeCount=0;                                 //count of nodes
+    bool clearWasCalled=false;
+    int copyNodeCount=0;                            //a count to copy all existing element
+
+    /*===CONSTRUCTORS====*/
+    LinkedList()
+    {
+
+    }
+//=====Aided Method for Copy Constructor=====//
+
+void CopyData (T data) {
+    Node *nodeHead = new Node;
+
+    /*-----For the very first data----*/
+    if (copyNodeCount == 0) {
+        nodeHead->data = data;
+
+        //The courtesies for adding head
+        pointerToHead = nodeHead;             //FIRST TERM MAKE IT HEAD AND TAIL
+        pointerToTail = nodeHead;             //FIRST TERM MAKE IT HEAD AND TAIL
+        copyNodeCount++;                        //INCREMENT SIZE
+    }
+
+        /*-----from second data onwards----*/
+
+    else if (copyNodeCount != 0) {
+        nodeHead->data = data;
+
+        //THe courtesies for adding the head
+        nodeHead->prev = pointerToTail;
+        pointerToTail->next = nodeHead;
+        copyNodeCount++;
+        pointerToTail = nodeHead;
+    }
+}
+
+    //Copy Constructors
+    LinkedList (const LinkedList<T>& old) {
+        this->clearWasCalled = old.clearWasCalled;
+        this->nodeCount = old.nodeCount;
+
+        Node *iteratorPtr = old.pointerToHead;
+        //this->pointerToHead = old.pointerToHead;
+
+
+        for (unsigned int i = 0; i < nodeCount; i++) {
+            this->CopyData(iteratorPtr->data);
+            iteratorPtr=iteratorPtr->next;
+        }
+        copyNodeCount=0;
+    }
+
+    LinkedList<T>& operator= (const LinkedList<T>& old)
+    {
+        this->clearWasCalled = old.clearWasCalled;
+        this->nodeCount = old.nodeCount;
+
+        Node *iteratorPtr = old.pointerToHead;
+        //this->pointerToHead = old.pointerToHead;
+
+
+        for (unsigned int i = 0; i < nodeCount; i++) {
+            this->CopyData(iteratorPtr->data);
+            iteratorPtr=iteratorPtr->next;
+        }
+        copyNodeCount=0;
+        return *this;
+    }
+
+
+
+    /*=======Behaviours========*/
+void PrintForward() const {
+        //TO PRINT ALL  NODES THAT I HAVE SO FAR
+        Node* printerPointer=pointerToHead;
+           if (nodeCount!=0)
+        {
+
+           for (unsigned int c=0;c<nodeCount;c++)
+           {
+               cout<<printerPointer->data<<endl;
+               printerPointer=printerPointer->next;
+           }
+        }
+           else
+        {
+            cout<<"The Linked List does not contain any element";
+        }
+
+    }
+
+    void PrintReverse() const {
+//TO PRINT ALL THE NODES THAT I HAVE SO FAR IN REVERSE ORDER
+
+        Node* printerPointer=pointerToTail;
+        if (nodeCount!=0)
+        {
+
+            for (unsigned int c=0;c<nodeCount;c++)
+            {
+                cout<<printerPointer->data<<endl;
+                printerPointer=printerPointer->prev;
+            }
+        }
+        else
+        {
+            cout<<"The Linked List does not contain any element";
+        }
+
+    }
+
+    void PrintForwardRecursive(const Node *node) const {
+        if (node->next!= nullptr) {
+            cout<<node->data<<endl;
+            PrintForwardRecursive(node->next);
+        }
+        else
+            cout<<node->data<<endl;
+    }
+
+    void PrintReverseRecursive(const Node *node) const {
+        if (node->prev!= nullptr) {
+            cout<<node->data<<endl;
+            PrintReverseRecursive(node->prev);
+        }
+        else
+            cout<<node->data<<endl;
+    }
+
+
+/*======Insertion=======*/
+
+void AddHead(const T& data) {
+        Node* nodeHead = new Node;
+
+        /*-----For the very first data----*/
+        if (nodeCount == 0) {
+            nodeHead->data = data;
+
+            //The courtesies for adding head
+            pointerToHead=nodeHead;             //FIRST TERM MAKE IT HEAD AND TAIL
+            pointerToTail=nodeHead;             //FIRST TERM MAKE IT HEAD AND TAIL
+            nodeCount++;                        //INCREMENT SIZE
+        }
+
+        /*-----from second data onwards----*/
+
+        else if (nodeCount !=0)
+        {
+            nodeHead->data=data;
+
+            //THe courtesies for adding the head
+            nodeHead->next=pointerToHead;
+            pointerToHead->prev=nodeHead;
+            nodeCount++;
+            pointerToHead=nodeHead;
+
+        }
+
+    }
+
+    void InsertAt(const T&data, unsigned int index)
+    {
+
+        if (index>nodeCount)
+        {
+            throw "Trying to reach out of bound";
+        }
+
+
+         if (index==0)     //if the first one matches
+        {
+            AddHead(data);
+
+        }
+        else if (index==nodeCount)            //if the last one matches
+        {
+            AddTail(data);
+
+        }
+
+        else
+        {
+            Node* insertionPointer=this->GetNode(index);
+            Node* addedNewPointer= new Node;
+            addedNewPointer->data=data;
+
+            insertionPointer->prev->next = addedNewPointer;
+            (addedNewPointer->prev)=(insertionPointer->prev);
+            (addedNewPointer->next)=(insertionPointer);
+            (insertionPointer->prev)=addedNewPointer;
+
+            nodeCount++;
+
+        }
+
+
+    }
+
+    void InsertAfter(Node* node, const T& data)
+    {
+        if (node==pointerToTail)
+        {
+            throw "Trying to reach out of bound";
+        }
+
+        else
+        {
+            Node* insertionPointer=node->next;
+            Node* addedNewPointer= new Node;
+            addedNewPointer->data=data;
+
+            insertionPointer->prev->next = addedNewPointer;
+            (addedNewPointer->prev)=(insertionPointer->prev);
+            (addedNewPointer->next)=(insertionPointer);
+            (insertionPointer->prev)=addedNewPointer;
+
+            nodeCount++;
+
+        }
+    }
+
+    void InsertBefore(Node* node, const T&data)
+    {
+        if (node==pointerToTail)
+        {
+            throw "Trying to reach out of bound";
+        }
+
+        else
+        {
+            Node* insertionPointer=node;
+            Node* addedNewPointer= new Node;
+            addedNewPointer->data=data;
+
+            insertionPointer->prev->next = addedNewPointer;
+            (addedNewPointer->prev)=(insertionPointer->prev);
+            (addedNewPointer->next)=(insertionPointer);
+            (insertionPointer->prev)=addedNewPointer;
+
+            nodeCount++;
+
+        }
+    }
+
+    void AddTail(const T& data) {
+
+    Node* nodeHead=new Node;
+
+        /*-----For the very first data----*/
+        if (nodeCount == 0) {
+            nodeHead->data = data;
+
+            //The courtesies for adding head
+            pointerToHead=nodeHead;             //FIRST TERM MAKE IT HEAD AND TAIL
+            pointerToTail=nodeHead;             //FIRST TERM MAKE IT HEAD AND TAIL
+            nodeCount++;                        //INCREMENT SIZE
+        }
+
+            /*-----from second data onwards----*/
+
+        else if (nodeCount !=0)
+        {
+            nodeHead->data=data;
+
+            //THe courtesies for adding the head
+            nodeHead->prev=pointerToTail;
+            pointerToTail->next=nodeHead;
+            nodeCount++;
+            pointerToTail=nodeHead;
+        }
+
+
+    }
+
+    /*=====REMOVAL OPERATORS======*/
+
+    bool RemoveHead()
+    {
+        if (nodeCount>2) {
+            Node *removalPointer = pointerToHead;
+            pointerToHead = pointerToHead->next;
+            pointerToHead->prev = nullptr;
+            nodeCount--;
+            delete (removalPointer);
+
+            return true;
+        }
+
+        else if (nodeCount==1)
+        {
+            Node *removalPointer = pointerToHead;
+            pointerToHead = nullptr;
+            pointerToTail= nullptr;
+            nodeCount--;
+            delete (removalPointer);
+
+            return true;
+
+        }
+        else if (nodeCount==2)
+        {
+            Node *removalPointer = pointerToHead;
+            pointerToHead = pointerToTail;
+            nodeCount--;
+            delete (removalPointer);
+
+            return true;
+
+        }
+        else if(nodeCount==0) return false;
+
+        return false;
+    }
+
+    bool RemoveTail()
+    {
+
+            if (nodeCount>2) {
+
+                Node *removalPointer = pointerToTail;
+                pointerToTail = pointerToTail->prev;
+                (pointerToTail->next) = nullptr;
+                nodeCount--;
+                delete (removalPointer);
+
+                return true;
+            }
+
+            else if (nodeCount==1)
+            {
+                Node *removalPointer = pointerToTail;
+                pointerToHead = nullptr;
+                pointerToTail= nullptr;
+                nodeCount--;
+                delete (removalPointer);
+
+                return true;
+
+            }
+            else if (nodeCount==2)
+            {
+                Node *removalPointer = pointerToTail;
+                pointerToTail = pointerToHead;
+                nodeCount--;
+                delete (removalPointer);
+
+                return true;
+
+            }
+            else return false;
+    }
+
+    unsigned int Remove (const T &data)
+    {
+        unsigned int nodesRemoved=0;
+        Node* removePtr=pointerToHead;
+        Node* deletePtr= nullptr;
+
+        for (unsigned int i=0;removePtr->next!= nullptr;i++)
+        {
+            //check if the data is same
+            if((removePtr==pointerToHead)&(removePtr->data==data))      //if the first one matches
+            {
+                RemoveHead();
+                nodesRemoved++;
+            }
+            else if ((removePtr==pointerToTail)&(removePtr->data==data))            //if the last one matches
+            {
+                RemoveTail();
+                nodesRemoved++;
+            }
+
+            //If it is in the middle
+            else if (removePtr->data==data)
+            {
+                (removePtr->prev->next)=(removePtr->next);
+                (removePtr->next->prev)=(removePtr->prev);
+                 deletePtr=removePtr;
+                nodeCount--;
+                nodesRemoved++;
+            }
+
+            //after all checks and balance
+            removePtr=removePtr->next;
+
+            //I am done traversing now delete the data
+            if (deletePtr!= nullptr)
+            {
+                delete deletePtr;
+                deletePtr= nullptr;
+            }
+        }
+        return nodesRemoved;
+    }
+
+    bool RemoveAt(unsigned int index)
+    {   bool removal=false;
+
+        if (index>nodeCount) return removal;
+
+        Node* removePtr=this->GetNode(index);
+        Node* deletePtr;
+
+        //check if the data is same
+        if (removePtr==pointerToHead)     //if the first one matches
+        {
+            RemoveHead();
+
+        }
+        else if ((removePtr==pointerToTail))            //if the last one matches
+        {
+            RemoveTail();
+
+        }
+
+        else
+            {
+            (removePtr->prev->next) = (removePtr->next);
+            (removePtr->next->prev) = (removePtr->prev);
+            deletePtr = removePtr;
+            nodeCount--;
+
+            if (deletePtr != nullptr)
+            {
+                delete deletePtr;
+                deletePtr = nullptr;
+            }
+        }
+        return NULL;
+    }
+
+    void AddNodesHead(const T* data, unsigned int count) {
+    for (unsigned int i=count-1;i>=0;)
+    {
+        AddHead(data[i]);
+        if(i!=0) i--;
+        else break;
+    }
+    }
+
+    void AddNodesTail(const T* data, unsigned int count) {
+
+    for (unsigned int i=0;i<count;i++)
+        {
+            AddTail(data[i]);
+        }
+    }
+
+
+    /*=====OPERATORS====*/
+
+    const T& operator[] (unsigned int index) const
+    {
+        T& returner=this->pointerToHead->data;
+        unsigned int indexCount=0;
+
+        if (indexCount>nodeCount)
+        {
+            throw "Accessing out of bounds";
+        }
+        Node* iteratorPtr=pointerToHead;
+
+        for (unsigned int i=0;i<nodeCount;i++)
+        {
+            if (indexCount==index)
+            {
+                return iteratorPtr->data;
+            }
+            //go through
+            iteratorPtr=iteratorPtr->next;
+            indexCount++;
+        }
+        return returner;
+    }
+
+    T& operator[] (unsigned int index)
+    {
+        T& returner=this->pointerToHead->data;
+        unsigned int indexCount=0;
+
+        if (indexCount>nodeCount)
+        {
+            throw "Accessing out of bounds";
+        }
+        Node* iteratorPtr=pointerToHead;
+
+        for (unsigned int i=0;i<nodeCount;i++)
+        {
+            if (indexCount==index)
+            {
+                return iteratorPtr->data;
+            }
+            //go through
+            iteratorPtr=iteratorPtr->next;
+            indexCount++;
+        }
+        return returner;
+    }
+
+    bool operator==(const LinkedList<T> &rhs)
+    {
+        Node* iteratorPtrThis=pointerToHead;
+        Node* iteratorPtrRHS=rhs.pointerToHead;
+        bool match=true;
+        for (unsigned int i=0;i<nodeCount;i++)
+        {
+            if ((iteratorPtrThis->data)!=(iteratorPtrRHS->data)) match=false;
+            iteratorPtrRHS=iteratorPtrRHS->next;
+            iteratorPtrThis=iteratorPtrThis->next;
+        }
+        return match;
+    }
+
+
+    /*=====Accessors====*/
+
+    Node* Find (const T& data)
+    {
+        Node* iteratorPtrThis=pointerToHead;
+
+        for (unsigned int i=0;i<nodeCount;i++)
+        {
+            if (iteratorPtrThis->data==data) return iteratorPtrThis;
+            iteratorPtrThis=iteratorPtrThis->next;
+        }
+        return NULL;
+    }
+
+    const Node* Find (const T& data) const
+    {
+        Node* iteratorPtrThis=pointerToHead;
+
+        for (unsigned int i=0;i<nodeCount;i++)
+        {
+            if (iteratorPtrThis->data==data) return *iteratorPtrThis;
+            iteratorPtrThis=iteratorPtrThis->next;
+        }
+        return NULL;
+    }
+
+    void FindAll(vector<Node*>& outData, const T& value) const
+    {
+        Node* iteratorPtrThis=pointerToHead;
+
+        for (unsigned int i=0;i<nodeCount;i++)
+        {
+            if (iteratorPtrThis->data==value)
+                outData.push_back(iteratorPtrThis);
+            iteratorPtrThis=iteratorPtrThis->next;
+        }
+    }
+
+
+    Node* GetNode (unsigned int index)
+    {
+        unsigned int indexCount=0;
+
+        if (indexCount>nodeCount)
+        {
+            throw "Accessing out of bounds";
+        }
+        Node* iteratorPtr=pointerToHead;
+
+        for (unsigned int i=0;i<nodeCount;i++)
+        {
+            if (indexCount==index)
+            {
+                return iteratorPtr;
+            }
+            //go through
+            if (iteratorPtr->next!= nullptr)
+                iteratorPtr=iteratorPtr->next;
+            indexCount++;
+        }
+        return NULL;
+    }
+
+    const Node* GetNode (unsigned int index) const
+    {
+        unsigned int indexCount=0;
+
+        if (indexCount>nodeCount)
+        {
+            throw "Accessing out of bounds";
+        }
+        Node* iteratorPtr=pointerToHead;
+
+        for (unsigned int i=0;i<nodeCount;i++)
+        {
+            if (indexCount==index)
+            {
+                return iteratorPtr;
+            }
+            //go through
+            iteratorPtr=iteratorPtr->next;
+            indexCount++;
+        }
+        return NULL;
+    }
+
+    unsigned int NodeCount()
+    {
+        return nodeCount;
+    }
+
+    Node* Head()
+    {
+       return pointerToHead;
+    }
+    const Node* Head() const
+    {
+        return pointerToHead;
+    }
+
+    Node* Tail()
+    {
+        return pointerToTail;
+    }
+    const Node* Tail() const
+    {
+        return pointerToTail;
+    }
+
+    /*==Clear==*/ //Manual Delete
+
+    void Clear ()
+    {
+        Node *deletePointer;
+        for (unsigned int i = 0; pointerToHead!= nullptr; i++) {
+            deletePointer = pointerToHead;
+            pointerToHead = pointerToHead->next;
+            delete deletePointer;
+            nodeCount--;
+        }
+
+        this->nodeCount=0;
+        this->pointerToHead= nullptr;
+        this->pointerToTail= nullptr;
+        clearWasCalled=true;
+    }
+
+
+    /*======Destroy Evertything That was Created======*/
+
+    ~LinkedList()
+    {
+
+        if (!clearWasCalled) {
+            Node *deletePointer;
+            for (unsigned int i = 0; i < nodeCount; i++) {
+                deletePointer = pointerToHead;
+                pointerToHead = pointerToHead->next;
+                delete deletePointer;
+            }
+        }
+
+    }
+};
