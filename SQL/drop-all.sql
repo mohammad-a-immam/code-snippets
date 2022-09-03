@@ -1,3 +1,12 @@
+/*non-system stored procedures
+views
+functions
+foreign key constraints
+primary key constraints
+system_versioning
+tables*/
+
+
 /* Drop all non-system stored procs */
 DECLARE @name VARCHAR(128)
 DECLARE @SQL VARCHAR(254)
