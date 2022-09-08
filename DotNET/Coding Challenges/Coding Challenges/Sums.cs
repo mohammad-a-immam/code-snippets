@@ -29,5 +29,108 @@ namespace Coding_Challenges
 
             return result;
         }
+
+        public int MaxProfit(int[] prices)
+        {
+            if (prices.Length < 2)
+                return 0;
+
+            int buy = 0;
+            int sell = 1;
+            int maxProfit = 0;
+
+            while (sell < prices.Length)
+            {
+
+                var currentProfit = prices[sell] - prices[buy];
+                if (prices[buy] > prices[sell])
+                {
+                    buy = sell;
+                }
+
+                else if (currentProfit > maxProfit)
+                {
+                    maxProfit = currentProfit;
+
+                }
+                sell++;
+            }
+
+            return maxProfit;
+        }
+
+        //bad solution
+        /*public int MaxProfit(int[] prices)
+        {
+            if (prices.Length < 2)
+                return 0;
+
+            int buy = prices[0];
+            int sell = prices[1];
+
+
+            for (int i = 0; i < prices.Length; i++)
+            {
+                if (prices[i] <= buy)
+                {
+                    //check profit
+                    for (int j = i + 1; j < prices.Length; j++)
+                    {
+                        if (prices[j] - prices[i] > sell - buy)
+                        {
+                            buy = prices[i];
+                            sell = prices[j];
+                        }
+                    }
+                }
+
+
+            }
+
+            if (buy > sell)
+                return 0;
+
+            return sell - buy;
+        }*/
+
+
+        /*public int MaxProfit(int[] prices)
+        {
+            if (prices.Length < 2)
+                return 0;
+
+            int buy = prices[0];
+            int sell = prices[1];
+
+            int maxProfit = sell - buy;
+
+
+
+            for (int i = 0; i < prices.Length; i++)
+            {
+
+                //check profit
+                for (int j = i + 1; j < prices.Length; j++)
+                {
+                    if (prices[j] - prices[i] > maxProfit)
+                    {
+                        buy = prices[i];
+                        sell = prices[j];
+                        maxProfit = sell - buy;
+                    }
+                }
+
+
+
+            }
+
+            if (buy >= sell)
+                return 0;
+
+
+            return sell - buy;
+        }*/
     }
+
+
 }
