@@ -1,0 +1,6 @@
+2021-08-12 14:23:11,209|DEBUG|LOG AS YOU MAY WISH
+
+2021-08-12 14:39:24,619|WARNING|No Context|Your message here
+2021-08-12 14:39:24,620|WARNING|Context Here|Your message here
+2021-08-12 15:47:16,207|WARNING|No Context|Your message here
+2021-08-12 15:47:16,208|WARNING|Context Here|Your message here
